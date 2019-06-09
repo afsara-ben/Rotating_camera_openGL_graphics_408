@@ -83,6 +83,7 @@ void drawOneEighthSphere(double radius, int slices, int stacks, int divisionNo)
         double h,r;
 
         glRotatef(90*(divisionNo%4),0,0,1);
+        //generate points
         for(i=0; i<=stacks; i++) // <= na diye < dile kibhabe alada hoy
         {
             h=radius*sin(((double)i/(double)stacks)*(pi/2));
@@ -94,17 +95,18 @@ void drawOneEighthSphere(double radius, int slices, int stacks, int divisionNo)
                 points[i][j].y = r*sin(((double)j/(double)slices) * (pi/2));
                 points[i][j].z = h;
 
-                glColor3f(0,0,0.6);
-                glBegin(GL_POINTS);
-                glVertex3f(points[i][j].x,points[i][j].y,points[i][j].z);
-                glEnd();
+//                glColor3f(0,0,0.6);
+//                glBegin(GL_POINTS);
+//                glVertex3f(points[i][j].x,points[i][j].y,points[i][j].z);
+//                glEnd();
             }
         }
 
         ///draw quads using generated points
         for(i=0; i<stacks; i++)
         {
-            glColor3f((double)i/(double)stacks+0.5,(double)i/(double)stacks,(double)i/(double)stacks);
+            //glColor3f((double)i/(double)stacks+0.5,(double)i/(double)stacks,(double)i/(double)stacks);
+            glColor3f(1,0,0);
             for(j=0; j<slices; j++)
             {
                 glBegin(GL_QUADS);
@@ -119,7 +121,7 @@ void drawOneEighthSphere(double radius, int slices, int stacks, int divisionNo)
                     }
 
                     // lower hemisphere //only z axis points are inverted
-                    if(divisionNo > 4 )
+                    if(divisionNo >= 4 )
                     {
                         glVertex3f(points[i][j].x,points[i][j].y,-points[i][j].z);
                         glVertex3f(points[i][j+1].x,points[i][j+1].y,-points[i][j+1].z);
@@ -275,19 +277,19 @@ void specialKeyListener(int key, int x, int y)
 }
 void drawSquare(double a)
 {
-    //glColor3f(1.0,0.0,0.0);
+    glColor3f(1.0,1.0,1.0);
     glBegin(GL_QUADS);
     {
-        glVertex3f( a, a,2);
-        glVertex3f( a,-a,2);
-        glVertex3f(-a,-a,2);
-        glVertex3f(-a, a,2);
+        glVertex3f( a, a,0);
+        glVertex3f( a,-a,0);
+        glVertex3f(-a,-a,0);
+        glVertex3f(-a, a,0);
     }
     glEnd();
 }
 
 
-void drawOneFourthCylinder(float radius, int halfLength, int slices, int divisionNo)
+void drawOneFourthCylinder(float radius, int Length, int slices, int divisionNo)
 {
     glPushMatrix();
     {
@@ -295,12 +297,11 @@ void drawOneFourthCylinder(float radius, int halfLength, int slices, int divisio
         float theta;
 
         struct Point points[100];
+        int halfLength=Length/2;
 
-
-        glRotatef(90*(divisionNo%4),0,0,1);
+        glRotatef(90*(divisionNo),0,0,1);
 
         //generate points
-        //glColor3f(0,0,1);
         for( i=0; i<=slices; i++)
         {
             theta = ((double)i/(double)slices)*pi/2;
@@ -311,11 +312,13 @@ void drawOneFourthCylinder(float radius, int halfLength, int slices, int divisio
             //glVertex3f(points[i].x, points[i].y,points[i].z);
 
         }
+
+        //draw the cylinder from generated points
         for( int j=0; j<slices; j++)
         {
 
-            glColor3f((double)j/(double)slices,(double)j/(double)slices,(double)j/(double)slices);
-
+            //glColor3f((double)j/(double)slices,(double)j/(double)slices,(double)j/(double)slices);
+            glColor3f(0,1,0);
             //forms the base of the cylinder
             glBegin(GL_TRIANGLES);
             {
@@ -333,6 +336,7 @@ void drawOneFourthCylinder(float radius, int halfLength, int slices, int divisio
             glVertex3f(points[j].x, points[j].y, -points[j].z);
 
             glEnd();
+
 
 //        glBegin(GL_TRIANGLE_STRIP);
 //
@@ -356,6 +360,92 @@ void drawOneFourthCylinder(float radius, int halfLength, int slices, int divisio
 //        glEnd();
         }
     }
+    glPopMatrix();
+}
+
+int transX[]= {1,-1,-1,1,1,-1,-1,1};
+int transY[]= {1,1,-1,-1,1,1,-1,-1};
+int transZ[]= {1,1,1,1,-1,-1,-1,-1};
+
+
+void drawSphereToFromCube(double cubeLength, int radius)
+{
+    int stacks = 20;
+    int slices = 20;
+    int j = 0;
+
+    glPushMatrix();
+    {
+
+        int dist = cubeLength/2;
+        dist = dist-radius;
+
+        //corner spheres
+        for(int i=0; i<8; i++)
+        {
+            glPushMatrix();
+            {
+                glTranslatef(dist*transX[i],dist*transY[i],dist*transZ[i]);
+                drawOneEighthSphere(radius, slices, stacks, i);
+            }
+            glPopMatrix();
+        }
+
+        /*side cylinders*/
+        for( j=0; j<=2; j++)
+        {
+            if(j==1)
+                glRotatef(90,1,0,0);
+            if(j==2)
+                glRotatef(90,0,1,0);
+
+
+            for(int i=0; i<4; i++)
+            {
+                glPushMatrix();
+                {
+                    glTranslatef(dist*transX[i],dist*transY[i],0);
+                    //glTranslatef(cubeLength*transX[i],cubeLength*transY[i],0);
+                    drawOneFourthCylinder(radius,dist*2,slices,i);
+                }
+                glPopMatrix();
+            }
+//        if(j==2)
+//            glRotatef(-90,0,1,0);
+//        if(j==1)
+//            glRotatef(-90,1,0,0);
+
+        }
+
+        //side squares
+        dist+=radius;
+        glPushMatrix();
+        {
+
+            for(int i=0; i<4; i++)
+            {
+                glPushMatrix();
+                {
+                    glRotatef(90*i,0,0,1);
+                    glTranslatef(dist,0,0);
+                    glRotatef(90,0,1,0);
+
+                    drawSquare(dist-radius);
+                }
+
+                glPopMatrix();
+            }
+
+
+            glTranslatef(0,0,dist);
+            drawSquare(dist-radius);
+            glTranslatef(0,0,-2*dist);
+            drawSquare(dist-radius);
+
+        }
+        glPopMatrix();
+    }
+    glPopMatrix();
 }
 
 void drawCircle(double radius,int segments)
@@ -611,14 +701,14 @@ void display()
     drawGrid_();
     //drawSS();
     //drawSphere(30,50,50);
-    drawOneFourthCylinder(30,15,10,1);
+    //drawOneFourthCylinder(30,15,10,1);
     //drawCone(30,50,20);
-    //drawSphereQuarter(20,10,10,1);
+
+    //drawSquare(5,10);
     //drawOneEighthSphere(20,10,10,5);
-    drawQuarterCylinder(30,30,10,1);
-//drawQuarterCylinder(30,30,10,1);
-//drawQuarterCylinder(30,30,10,2);
-//drawQuarterCylinder(30,30,10,3);
+
+    drawSphereToFromCube(50,10);
+    //drawCubeSphere(50,10);
 
 ///flush
     glutSwapBuffers();
