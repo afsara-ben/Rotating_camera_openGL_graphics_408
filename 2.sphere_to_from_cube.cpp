@@ -12,8 +12,10 @@ double cameraAngle;
 int drawGrid;
 int drawAxes;
 float angle;
-
-
+int sphereRadius, cubeLength;
+int transX[]= {1,-1,-1,1,1,-1,-1,1};
+int transY[]= {1,1,-1,-1,1,1,-1,-1};
+int transZ[]= {1,1,1,1,-1,-1,-1,-1};
 
 struct Point
 {
@@ -22,6 +24,55 @@ struct Point
 
 Point pos,u,r,l;
 
+
+/* FUNCTIONS */
+Point cartesianToPolar(Point vec);
+Point crossProduct(const Point &vec1, const Point &vec2);
+void drawSphere(double radius, int slices, int stacks);
+void drawOneEighthSphere(double radius, int slices, int stacks, int divisionNo);
+void drawSquare(double a);
+void drawOneFourthCylinder(float radius, int Length, int slices, int divisionNo);
+void drawSphereToFromCube(double cubeLength, int radius);
+void drawCircle(double radius,int segments);
+void drawCone(double radius,double height,int segments);
+void drawAxes_();
+void drawGrid_();
+void drawSS();
+void specialKeyListener(int key, int x, int y);
+void keyboardListener(unsigned char key, int x, int y);
+void mouseListener(int button, int state, int x, int y);
+void init();
+void display();
+void animate();
+
+
+Point cartesianToPolar(Point vec)
+{
+    Point polarVec;
+    int r,theta;
+    int x = vec.x;
+    int y = vec.y;
+
+    r = sqrt(x*x + y*y);
+    theta = atan(y/x);
+
+    polarVec.x = r*cos(theta);
+    polarVec.y = r*sin(theta);
+    polarVec.z = vec.z;
+
+    return polarVec;
+}
+
+Point crossProduct(const Point &vec1, const Point &vec2)
+{
+
+    Point res;
+    res.x = vec1.y*vec2.z-vec2.y*vec1.z;
+    res.y = vec1.z*vec2.x-vec2.z*vec1.x;
+    res.z = vec1.x*vec2.y-vec2.x*vec1.y;
+
+    return res;
+}
 /*
     slice = longitude
     stack = latitude
@@ -136,145 +187,6 @@ void drawOneEighthSphere(double radius, int slices, int stacks, int divisionNo)
     glPopMatrix();
 }
 
-void drawAxes_()
-{
-    if(drawAxes == 1)
-    {
-
-        glBegin(GL_LINES);
-
-        ///red x
-        glColor3f(1.0,0,0);
-        glVertex3f(100,0,0);
-        glVertex3f(-100,0,0);
-
-        ///green y
-        glColor3f(0,1.0,0);
-        glVertex3f(0,100,0);
-        glVertex3f(0,-100,0);
-
-        ///blue z
-        glColor3f(0,0,1.0);
-        glVertex3f(0,0,100);
-        glVertex3f(0,0,-100);
-
-        glEnd();
-    }
-
-}
-
-void drawGrid_()
-{
-
-    int i;
-    if(drawGrid == 1)
-    {
-
-        glColor3f(1,0.6,0.6);
-        glBegin(GL_LINES);
-
-        for(i = -8; i <=8; i++)
-        {
-            if(i ==0 )
-                continue;
-            ///lines parallel to y axis
-            glVertex3f(i*10,-90,0);
-            glVertex3f(i*10,90,0);
-
-            ///lines parallel to x axis
-            glVertex3f(-90,i*10,0);
-            glVertex3f(90,i*10,0);
-        }
-
-        glEnd();
-    }
-}
-
-void drawSS()
-{
-
-
-}
-
-
-
-Point cartesianToPolar(Point vec)
-{
-    Point polarVec;
-    int r,theta;
-    int x = vec.x;
-    int y = vec.y;
-
-    r = sqrt(x*x + y*y);
-    theta = atan(y/x);
-
-    polarVec.x = r*cos(theta);
-    polarVec.y = r*sin(theta);
-    polarVec.z = vec.z;
-
-    return polarVec;
-}
-
-void specialKeyListener(int key, int x, int y)
-{
-    printf("%d\n",key);
-    float fraction = 2.0f;
-
-    switch(key)
-    {
-    //backward
-    case GLUT_KEY_DOWN :
-
-        pos.x -= l.x * fraction;
-        pos.y -= l.y * fraction;
-
-        break;
-
-    //forward
-    case GLUT_KEY_UP :
-
-        pos.x += l.x * fraction;
-        pos.y += l.y * fraction;
-        break;
-
-    case GLUT_KEY_LEFT :
-
-        pos.x -= fraction*r.x;
-        pos.y -= fraction*r.y;
-        //pos.z -= fraction+r.z;
-
-        break;
-
-    case GLUT_KEY_RIGHT :
-
-        pos.x += fraction*r.x;
-        pos.y += fraction*r.y;
-        //pos.z += fraction+r.z;
-
-        break;
-
-    case GLUT_KEY_PAGE_UP:
-        pos.z += 3.0;
-
-        break;
-
-    case GLUT_KEY_PAGE_DOWN:
-        pos.z -= 3.0;
-        break;
-
-
-    case GLUT_KEY_INSERT:
-        break;
-
-    case GLUT_KEY_HOME:
-        break;
-    case GLUT_KEY_END:
-        break;
-
-    default:
-        break;
-    }
-}
 void drawSquare(double a)
 {
     glColor3f(1.0,1.0,1.0);
@@ -363,9 +275,7 @@ void drawOneFourthCylinder(float radius, int Length, int slices, int divisionNo)
     glPopMatrix();
 }
 
-int transX[]= {1,-1,-1,1,1,-1,-1,1};
-int transY[]= {1,1,-1,-1,1,1,-1,-1};
-int transZ[]= {1,1,1,1,-1,-1,-1,-1};
+
 
 
 void drawSphereToFromCube(double cubeLength, int radius)
@@ -502,16 +412,134 @@ void drawCone(double radius,double height,int segments)
     }
 }
 
-Point crossProduct(const Point &vec1, const Point &vec2)
+void drawAxes_()
+{
+    if(drawAxes == 1)
+    {
+
+        glBegin(GL_LINES);
+
+        ///red x
+        glColor3f(1.0,0,0);
+        glVertex3f(100,0,0);
+        glVertex3f(-100,0,0);
+
+        ///green y
+        glColor3f(0,1.0,0);
+        glVertex3f(0,100,0);
+        glVertex3f(0,-100,0);
+
+        ///blue z
+        glColor3f(0,0,1.0);
+        glVertex3f(0,0,100);
+        glVertex3f(0,0,-100);
+
+        glEnd();
+    }
+
+}
+
+void drawGrid_()
 {
 
-    Point res;
-    res.x = vec1.y*vec2.z-vec2.y*vec1.z;
-    res.y = vec1.z*vec2.x-vec2.z*vec1.x;
-    res.z = vec1.x*vec2.y-vec2.x*vec1.y;
+    int i;
+    if(drawGrid == 1)
+    {
 
-    return res;
+        glColor3f(1,0.6,0.6);
+        glBegin(GL_LINES);
+
+        for(i = -8; i <=8; i++)
+        {
+            if(i ==0 )
+                continue;
+            ///lines parallel to y axis
+            glVertex3f(i*10,-90,0);
+            glVertex3f(i*10,90,0);
+
+            ///lines parallel to x axis
+            glVertex3f(-90,i*10,0);
+            glVertex3f(90,i*10,0);
+        }
+
+        glEnd();
+    }
 }
+
+void drawSS()
+{
+
+
+}
+
+
+void specialKeyListener(int key, int x, int y)
+{
+    printf("%d\n",key);
+    float fraction = 2.0f;
+
+    switch(key)
+    {
+    //backward
+    case GLUT_KEY_DOWN :
+
+        pos.x -= l.x * fraction;
+        pos.y -= l.y * fraction;
+
+        break;
+
+    //forward
+    case GLUT_KEY_UP :
+
+        pos.x += l.x * fraction;
+        pos.y += l.y * fraction;
+        break;
+
+    case GLUT_KEY_LEFT :
+
+        pos.x -= fraction*r.x;
+        pos.y -= fraction*r.y;
+        //pos.z -= fraction+r.z;
+
+        break;
+
+    case GLUT_KEY_RIGHT :
+
+        pos.x += fraction*r.x;
+        pos.y += fraction*r.y;
+        //pos.z += fraction+r.z;
+
+        break;
+
+    case GLUT_KEY_PAGE_UP:
+        pos.z += 3.0;
+
+        break;
+
+    case GLUT_KEY_PAGE_DOWN:
+        pos.z -= 3.0;
+        break;
+
+
+    case GLUT_KEY_INSERT:
+        break;
+
+    case GLUT_KEY_HOME:
+        if(sphereRadius<cubeLength/2)
+            sphereRadius++;
+        break;
+    case GLUT_KEY_END:
+        if (sphereRadius > 0)
+        {
+            sphereRadius--;
+        }
+        break;
+
+    default:
+        break;
+    }
+}
+
 void keyboardListener(unsigned char key, int x, int y)
 {
     printf("%c\n",key);
@@ -646,6 +674,7 @@ void init()
     ///cameraAngle = 1.0;
     angle = 0.05f;
 
+
     pos.x = 100;
     pos.y = 100;
     pos.z = 0;
@@ -662,7 +691,8 @@ void init()
     r.y = 1/sqrt(2);
     r.z = 0;
 
-
+    sphereRadius = 10;
+    cubeLength = 50;
 
 
     ///clear screen
@@ -707,10 +737,10 @@ void display()
     //drawSquare(5,10);
     //drawOneEighthSphere(20,10,10,5);
 
-    drawSphereToFromCube(50,10);
-    //drawCubeSphere(50,10);
+    drawSphereToFromCube(cubeLength,sphereRadius);
 
-///flush
+
+    ///flush
     glutSwapBuffers();
 
 }
