@@ -127,6 +127,7 @@ void drawWheel_1(int radius, int segments, int dist,int angle, Point pos)
     float perimeter = 2*pi*radius;
     //float moveBy = perimeter * angle/360;
     float rotateBy = 360*dist/perimeter;
+    int width = perimeter/segments;
 
     glPushMatrix();
     {
@@ -181,6 +182,33 @@ void drawWheel_1(int radius, int segments, int dist,int angle, Point pos)
 
                 glEnd();
             }
+
+            //drawing the spikes
+            glPushMatrix();
+            glColor3f(1,0.4,1);
+            glRotatef(90,1,0,0);
+            glTranslatef(0,5,0);
+            glBegin(GL_QUADS);
+            glVertex3f(radius,width/2,0);
+            glVertex3f(radius,-width/2,0);
+            glVertex3f(-radius,-width/2,0);
+            glVertex3f(-radius,width/2,0);
+            glEnd();
+            glPopMatrix();
+
+            glPushMatrix();
+            glColor3f(1,0.4,1);
+            glRotatef(90,0,1,0);
+            glRotatef(90,0,0,1);
+            glTranslatef(0,5,0);
+            glBegin(GL_QUADS);
+            glVertex3f(radius,width/2,0);
+            glVertex3f(radius,-width/2,0);
+            glVertex3f(-radius,-width/2,0);
+            glVertex3f(-radius,width/2,0);
+            glEnd();
+            glPopMatrix();
+
         }
         glPopMatrix();
     }
