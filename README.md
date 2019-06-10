@@ -1,1 +1,3 @@
-# Rotating_camera_openGL_graphics_408
+# openGL_graphics_408_offline_1
+
+/Assignment 1 contains the assignment description
