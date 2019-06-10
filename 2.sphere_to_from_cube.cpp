@@ -347,10 +347,15 @@ void drawSphereToFromCube(double cubeLength, int radius)
             }
 
 
+            glPushMatrix();
             glTranslatef(0,0,dist);
             drawSquare(dist-radius);
-            glTranslatef(0,0,-2*dist);
+            glPopMatrix();
+
+            glPushMatrix();
+            glTranslatef(0,0,-dist);
             drawSquare(dist-radius);
+            glPopMatrix();
 
         }
         glPopMatrix();
